@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="62e17e70-b765-4da1-9bdf-ec4d7c63537d" >
+		<http:listener-connection host="0.0.0.0" port="8091" />
+	</http:listener-config>
+	<db:config name="Database_Config1" doc:name="Database Config" doc:id="82fd17ac-c812-408c-adc9-e8ba10eda626" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="admin" database="covid_cases_record" />
+	</db:config>
+	<flow name="covid_cases_sapiFlow" doc:id="f50f1901-5fd4-408f-8915-8b37272e3025" >
+		<http:listener doc:name="Listener" doc:id="7ab28c35-4f19-4206-9ad5-e6ac18dfbd46" config-ref="HTTP_Listener_config" path="/cases">
+			<http:response statusCode="#[vars.statusCode]" reasonPhrase="#[vars.httpReason]" />
+		</http:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="4479ceb7-ceed-49b0-9aae-d136bedbfe13" message="start logger: #[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="6320dc9e-455d-447e-952e-bccd24191035" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+var actionDate= now() as String {
+	format: "yyyy-MM-dd"
+}
+var owner= "UHID"
+---
+{
+	dateofbirth: payload.dateofbirth,
+	country: payload.address.country,
+	firstname: payload.firstName,
+	address: payload.address.streetAddress,
+	city: payload.address.city,
+	createdate: actionDate,
+	source: payload.source,
+	lastname: payload.lastName,
+	nationalidtype: payload.nationalIdType,
+	createby: owner,
+	nationalid: payload.nationalId,
+	updatedate: actionDate,
+	phone: payload.phone as String,
+	updateby: owner,
+	casetype: payload.caseType,
+	state: payload.address.state,
+	postal: payload.address.postal as String,
+	email: payload.EmailId
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:insert doc:name="Insert" doc:id="e9bf36a6-abfa-45f3-b525-80aeb45944fd" config-ref="Database_Config1" autoGenerateKeys="true">
+			<db:sql ><![CDATA[insert into covidpatientdetails (source,caseType,first_Name,last_Name,phone,Email_Id,date_of_birth,national_Id,national_Id_Type,street_Address,city,state,postal,country, create_date,update_date,create_by,update_by) values (:source, :casetype, :firstname, :lastname, :phone, :email, :dateofbirth, :nationalid, :nationalidtype, :address, :city, :state, :postal, :country, :createdate, :updatedate, :createby, :updateby)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[payload]]]></db:input-parameters>
+			<db:auto-generated-keys-column-names >
+				<db:auto-generated-keys-column-name value="covid_Id" />
+			</db:auto-generated-keys-column-names>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="b8ec7df8-cd2e-49ca-b336-4bba7d1fc578" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="statusCode" ><![CDATA[201]]></ee:set-variable>
+				<ee:set-variable variableName="httpReason" ><![CDATA["OK"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="cbd8f17a-1b81-46db-9372-b32de1886c87" message="End logger : #[payload]"/>
+	</flow>
+</mule>

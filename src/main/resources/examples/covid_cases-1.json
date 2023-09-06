@@ -1,0 +1,21 @@
+{
+	"covid_Id": "cs1",
+	"source": "hospital",
+	"caseType": "positive",
+	"firstName": "Mohan",
+	"lastName": "Reddy",
+	"phone": 8639094344,
+	"EmailId": "mohan12@gmail.com",
+	"dateofbirth": "2001-3-21",
+	"nationalId": "20-1345-23",
+	"nationalIdType": "SNN",
+	"address":{
+				"streetAddress": "4-8-75/95/B shatawahana colony",
+				"city": "Hyderabad",
+				"state": "Telangana",
+				"postal": 500028,
+				"country": "India"
+			}
+}
+
+	
