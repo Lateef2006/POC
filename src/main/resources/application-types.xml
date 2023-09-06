@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="covid_cases_input" format="json">
+      <types:shape format="weave" example="examples/covid_cases-2.json"><![CDATA[%dw 2.0
+
+type covid_cases_input = {|
+  source: String, 
+  caseType: String, 
+  firstName: String, 
+  lastName: String, 
+  phone: Number {"typeId": "double"}, 
+  EmailId: String, 
+  dateofbirth: String, 
+  nationalId: String, 
+  nationalIdType: String, 
+  address: {|
+    streetAddress: String, 
+    city: String, 
+    state: String, 
+    postal: Number {"typeId": "int"}, 
+    country: String
+  |}
+|} {"example": "{\\\"source\\\":\\\"hospital\\\",\\\"caseType\\\":\\\"positive\\\",\\\"firstName\\\":\\\"Mohan\\\",\\\"lastName\\\":\\\"Reddy\\\",\\\"phone\\\":8639094344,\\\"EmailId\\\":\\\"mohan12@gmail.com\\\",\\\"dateofbirth\\\":\\\"2001-3-21\\\",\\\"nationalId\\\":\\\"20-1345-23\\\",\\\"nationalIdType\\\":\\\"SNN\\\",\\\"address\\\":{\\\"streetAddress\\\":\\\"4-8-75\\/95\\/B shatawahana colony\\\",\\\"city\\\":\\\"Hyderabad\\\",\\\"state\\\":\\\"Telangana\\\",\\\"postal\\\":500028,\\\"country\\\":\\\"India\\\"}}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#6320dc9e-455d-447e-952e-bccd24191035">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="covid_cases_input"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#b8ec7df8-cd2e-49ca-b336-4bba7d1fc578"/>
+</types:mule>
